@@ -11,8 +11,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node-fetch": "^2.5.0",
+    "esnext": "^3.3.1",
     "express": "^4.17.1",
+    "node-fetch": "^2.6.0",
     "tslint": "^5.19.0",
+    "typedi": "^0.8.0",
     "typescript": "^3.6.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.18",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.0.2"
   }
 }
