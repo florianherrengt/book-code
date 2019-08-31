@@ -5,14 +5,24 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "lerna bootstrap"
+    "postinstall": "lerna bootstrap && node node_modules/husky/lib/installer/bin install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "lerna": "^3.16.4",
+    "prettier": "^1.18.2",
     "tslint": "^5.19.0",
     "typescript": "^3.6.2"
+  },
+  "devDependencies": {
+    "husky": "^3.0.4",
+    "pretty-quick": "^1.11.1"
   }
 }

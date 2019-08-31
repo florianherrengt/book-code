@@ -1,3 +1,6 @@
-var test = function () {
-    return 'hello world'
-}
+const printFizz = number => {
+  if (!Boolean(number % 3)) {
+    return "fizz";
+  }
+  return number;
+};
