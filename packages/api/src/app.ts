@@ -2,7 +2,7 @@ import * as express from "express";
 import fetch from "node-fetch";
 import { setFetch } from "./containers";
 import { EmojiRouter } from "./routers";
-import helmet from "helmet";
+import * as helmet from "helmet";
 import { RateLimiterMiddleware } from "./middlewares";
 
 export const bootstrap = async () => {
