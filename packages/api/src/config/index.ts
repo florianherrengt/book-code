@@ -8,6 +8,6 @@ export interface Config extends SharedConfig {
   env: "local" | "ci" | "staging" | "production";
 }
 
-export const config = { local, ci, staging, production }[
+export const config: Config = { local, ci, staging, production }[
   process.env.CONFIG_ENV || "local"
 ];
