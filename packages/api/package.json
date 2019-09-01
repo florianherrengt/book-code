@@ -12,6 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "@types/node-fetch": "^2.5.0",
+    "cross-env": "^5.2.1",
+    "dotenv": "^8.1.0",
     "esnext": "^3.3.1",
     "express": "^4.17.1",
     "node-fetch": "^2.6.0",
