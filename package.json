@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "lerna": "^3.16.4"
+    "lerna": "^3.16.4",
+    "tslint": "^5.19.0",
+    "typescript": "^3.6.2"
   }
 }
