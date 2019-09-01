@@ -13,20 +13,29 @@
   "dependencies": {
     "@types/helmet": "^0.0.44",
     "@types/node-fetch": "^2.5.0",
+    "@types/umzug": "^2.2.2",
     "cross-env": "^5.2.1",
     "dotenv": "^8.1.0",
     "esnext": "^3.3.1",
     "express": "^4.17.1",
     "helmet": "^3.20.1",
     "node-fetch": "^2.6.0",
+    "pg": "^7.12.1",
     "rate-limiter-flexible": "^1.1.1",
+    "reflect-metadata": "^0.1.13",
+    "sequelize": "^5.18.0",
+    "sequelize-typescript": "^1.0.0",
     "tslint": "^5.19.0",
     "typedi": "^0.8.0",
-    "typescript": "^3.6.2"
+    "typescript": "^3.6.2",
+    "umzug": "^2.2.0"
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.27",
     "@types/jest": "^24.0.18",
+    "@types/node": "^12.7.3",
     "@types/supertest": "^2.0.8",
+    "@types/validator": "^10.11.3",
     "jest": "^24.9.0",
     "supertest": "^4.0.2",
     "ts-jest": "^24.0.2"
