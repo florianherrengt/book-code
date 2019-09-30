@@ -1,7 +1,7 @@
 import * as express from "express";
 import fetch from "node-fetch";
 import { setFetch } from "./containers";
-import { EmojiRouter } from "./routers";
+import { EmojiRouter, GraphQLRouter } from "./routers";
 import * as helmet from "helmet";
 import { RateLimiterMiddleware } from "./middlewares";
 import { sequelize } from "./sequelize";
@@ -13,7 +13,7 @@ export const bootstrap = async () => {
   try {
     await umzug.up();
   } catch (e) {
-    console.error("Migration failed.");
+    console.error("Migration failed.", e);
     await umzug.down();
     process.exit(1);
   }
@@ -32,5 +32,6 @@ export const createApp = () => {
     })
   );
   app.use("/emoji", new EmojiRouter().router);
+  app.use("/graphql", new GraphQLRouter().router);
   return { app };
 };

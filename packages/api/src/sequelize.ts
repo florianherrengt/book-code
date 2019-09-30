@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import { config } from "./config";
-import * as models from "./models";
+import * as models from "./entities";
 
 export const sequelize = new Sequelize({
   ...config.database,
