@@ -22,6 +22,12 @@ class Link extends Model<Link> {
     allowNull: false
   })
   uri: string;
+
+  @Field()
+  @Column({
+    allowNull: false
+  })
+  userId: string;
 }
 
 setLinkEntity(Link);
