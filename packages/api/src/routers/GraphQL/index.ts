@@ -13,7 +13,8 @@ export class GraphQLRouter {
   }
   async buildSchema() {
     const schema = await buildSchema({
-      resolvers: Object.values(resolvers)
+      resolvers: Object.values(resolvers),
+      validate: false
     });
     const apolloServer = new ApolloServer({
       schema
