@@ -1,6 +1,7 @@
 export interface SharedConfig {
   logLevel: string;
   port: number;
+  jwtSecret: string;
   database: {
     dialect: "postgres";
     host: string;
@@ -15,6 +16,7 @@ export interface SharedConfig {
 export const sharedConfig: SharedConfig = {
   logLevel: process.env.LOG_LEVEL || "info", // we will come back to logs later
   port: parseInt(process.env.PORT || "1234"),
+  jwtSecret: process.env.JWT_SECRET || "",
   database: {
     dialect: "postgres",
     host: process.env.PG_HOST || "",

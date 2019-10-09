@@ -17,7 +17,7 @@ export const bootstrap = async () => {
     await umzug.down();
     process.exit(1);
   }
-  await sequelize.sync();
+  await sequelize.sync({ force: true });
 };
 
 export const createApp = () => {
