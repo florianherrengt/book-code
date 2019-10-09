@@ -1,4 +1,5 @@
-import { Int, ObjectType, Query, Resolver, Field } from "type-graphql";
+import { Int, ObjectType, Query, Resolver, Field, Ctx } from "type-graphql";
+import { GraphQLContext } from "..";
 
 @ObjectType()
 class Health {
@@ -9,7 +10,8 @@ class Health {
 @Resolver(of => Health)
 class HealthResolver {
   @Query(returns => Health)
-  async health(): Promise<Health> {
+  async health(@Ctx() context: GraphQLContext): Promise<Health> {
+    console.log({ context });
     return { ok: 1 };
   }
 }

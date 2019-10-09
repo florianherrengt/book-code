@@ -2,7 +2,7 @@ import * as React from "react";
 import { LinkList } from "./LinkList";
 import { Header } from "../../components/Header";
 import { useQuery } from "react-apollo";
-import { gql } from "apollo-boost";
+import gql from "graphql-tag";
 
 const getData = () => [{ id: "1", uri: "http://mock", userId: "userid" }];
 

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useMutation } from "react-apollo";
-import { gql } from "apollo-boost";
+import gql from "graphql-tag";
 import { Formik, Field, Form, FormikActions } from "formik";
 import styled from "styled-components";
 import { Input } from "../../components/Input";
