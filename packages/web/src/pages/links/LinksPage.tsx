@@ -8,7 +8,7 @@ const getData = () => [{ id: "1", uri: "http://mock", userId: "userid" }];
 
 export const LinksPage = () => {
   const { data, loading, error } = useQuery(gql`
-    {
+    query health {
       health {
         ok
       }
