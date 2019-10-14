@@ -7,6 +7,10 @@ import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
 import { theme } from "../../config";
 import { useHistory } from "react-router";
+import {
+  signUp as SignUpResponse,
+  signUpVariables as SignUpVariables
+} from "api-types";
 
 interface FormValues {
   emailAddress: string;
@@ -43,7 +47,10 @@ const StyledErrorMessage = styled.div`
 
 export const SignupPage = () => {
   const history = useHistory();
-  const [signUpMutation, { loading, error }] = useMutation(
+  const [signUpMutation, { loading, error }] = useMutation<
+    SignUpResponse,
+    SignUpVariables
+  >(
     gql`
       mutation signUp($input: UserAuthInput!) {
         signUp(input: $input) {
@@ -55,6 +62,9 @@ export const SignupPage = () => {
     `,
     {
       onCompleted({ signUp }) {
+        if (!signUp.jwt) {
+          return alert("Error: No JWT returned.");
+        }
         localStorage.setItem("token", signUp.jwt);
         history.push("/");
       }
