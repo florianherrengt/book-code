@@ -35,4 +35,5 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "packages/api/package.json" }}-{{ checksum "packages/web/package.json" }}
 
       # run tests!
-      - run: yarn test
+      - run: yarn --cwd packages/web test
+      - run: yarn --cwd packages/api test
