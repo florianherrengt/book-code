@@ -45,31 +45,30 @@ const StyledErrorMessage = styled.div`
   color: ${theme.colors.negative};
 `;
 
+export const SIGNUP_MUTATION = gql`
+  mutation signUp($input: UserAuthInput!) {
+    signUp(input: $input) {
+      id
+      emailAddress
+      jwt
+    }
+  }
+`;
+
 export const SignupPage = () => {
   const history = useHistory();
   const [signUpMutation, { loading, error }] = useMutation<
     SignUpResponse,
     SignUpVariables
-  >(
-    gql`
-      mutation signUp($input: UserAuthInput!) {
-        signUp(input: $input) {
-          id
-          emailAddress
-          jwt
-        }
+  >(SIGNUP_MUTATION, {
+    onCompleted({ signUp }) {
+      if (!signUp.jwt) {
+        return alert("Error: No JWT returned.");
       }
-    `,
-    {
-      onCompleted({ signUp }) {
-        if (!signUp.jwt) {
-          return alert("Error: No JWT returned.");
-        }
-        localStorage.setItem("token", signUp.jwt);
-        history.push("/");
-      }
+      localStorage.setItem("token", signUp.jwt);
+      history.push("/");
     }
-  );
+  });
 
   return (
     <Container>
