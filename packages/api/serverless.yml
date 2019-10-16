@@ -1,0 +1,231 @@
+service: daedalost
+
+provider:
+  region: eu-west-1
+  stage: ${opt:stage, 'dev'}
+  name: aws
+  runtime: nodejs10.x
+  memorySize: 1024
+  timeout: 30
+  vpc:
+    securityGroupIds:
+      - Fn::GetAtt: [VPCStaticIP, DefaultSecurityGroup]
+    subnetIds:
+      - Ref: SubnetPrivate
+      - Ref: SubnetPrivate2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ec2:CreateNetworkInterface
+        - ec2:DeleteNetworkInterface
+        - ec2:DescribeNetworkInterfaces
+      Resource: "*"
+  environment:
+    SERVERLESS_EXPRESS_PLATFORM: aws
+    NODE_ENV: production
+    STAGE: ${opt:stage, 'development'}
+    POSTGRES_DATABASE: ${self:service}
+    POSTGRES_HOST:
+      Fn::GetAtt:
+        - ServerlessRDSCluster
+        - Endpoint.Address
+    POSTGRES_USERNAME: ${ssm:/${self:service}/${self:provider.stage}/POSTGRES_USERNAME}
+    POSTGRES_PASSWORD: ${ssm:/${self:service}/${self:provider.stage}/POSTGRES_PASSWORD}
+    JWT_SECRET: ${ssm:/${self:service}/${self:provider.stage}/JWT_SECRET}
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline-ssm
+  - serverless-offline
+  - serverless-finch
+
+custom:
+  client:
+    bucketName: daedalost.com
+    distributionFolder: ../web/build
+    errorDocument: index.html
+
+functions:
+  server:
+    handler: src/index.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+resources:
+  Resources:
+    # Step 1: Create a new VPC
+    VPCStaticIP:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: 11.0.0.0/16
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-vpc
+
+    # Step 2: Create 2 Subnets
+    SubnetPublic:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ${self:provider.region}a
+        CidrBlock: 11.0.0.0/24
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-public-subnet
+        VpcId:
+          Ref: VPCStaticIP
+
+    SubnetPrivate:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ${self:provider.region}b
+        CidrBlock: 11.0.1.0/24
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-private-subnet-b
+        VpcId:
+          Ref: VPCStaticIP
+
+    SubnetPrivate2:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ${self:provider.region}c
+        CidrBlock: 11.0.2.0/24
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-private-subnet-c
+        VpcId:
+          Ref: VPCStaticIP
+
+    # Step 3: Create an Internet Gateway
+    InternetGateway:
+      Type: AWS::EC2::InternetGateway
+      Properties:
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-igw
+
+    # Attach Internet Gateway to VPC
+    VPCGatewayAttachment:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        InternetGatewayId:
+          Ref: InternetGateway
+        VpcId:
+          Ref: VPCStaticIP
+
+    # Step 4: Create a public Route Table and Assign it to our public route
+    RouteTablePublic:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: VPCStaticIP
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-public-route
+
+    RoutePublic:
+      Type: AWS::EC2::Route
+      Properties:
+        DestinationCidrBlock: 0.0.0.0/0
+        GatewayId:
+          Ref: InternetGateway
+        RouteTableId:
+          Ref: RouteTablePublic
+
+    SubnetRouteTableAssociationPublic:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId:
+          Ref: RouteTablePublic
+        SubnetId:
+          Ref: SubnetPublic
+
+    # Step 5: Create a NAT Gateway
+    # Before creating NAT Gateway, we need to create Elastic IP with vpc scope
+    EIP:
+      Type: AWS::EC2::EIP
+      Properties:
+        Domain: vpc
+
+    NatGateway:
+      Type: AWS::EC2::NatGateway
+      Properties:
+        AllocationId:
+          Fn::GetAtt: [EIP, AllocationId]
+        SubnetId:
+          Ref: SubnetPublic
+
+    RouteTablePrivate:
+      Type: AWS::EC2::RouteTable
+      Properties:
+        VpcId:
+          Ref: VPCStaticIP
+        Tags:
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-private-route
+
+    RoutePrivate:
+      Type: AWS::EC2::Route
+      Properties:
+        DestinationCidrBlock: 0.0.0.0/0
+        NatGatewayId:
+          Ref: NatGateway
+        RouteTableId:
+          Ref: RouteTablePrivate
+
+    SubnetRouteTableMainAssociationPrivate:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId:
+          Ref: RouteTablePrivate
+        SubnetId:
+          Ref: SubnetPrivate
+
+    SubnetRouteTableMainAssociationPrivate2:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId:
+          Ref: RouteTablePrivate
+        SubnetId:
+          Ref: SubnetPrivate2
+
+    DatabaseSubnetGroup:
+      Type: AWS::RDS::DBSubnetGroup
+      Properties:
+        DBSubnetGroupDescription: Db subnet for ${self:service}
+        SubnetIds:
+          - Ref: SubnetPrivate
+          - Ref: SubnetPrivate2
+
+    RDSSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupDescription: SecurityGroup ${self:service}/${self:provider.stage}
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 3306
+            ToPort: 3306
+            SourceSecurityGroupId:
+              Fn::GetAtt: [VPCStaticIP, DefaultSecurityGroup]
+        VpcId:
+          Ref: VPCStaticIP
+
+    ServerlessRDSCluster:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        DBSubnetGroupName:
+          Ref: DatabaseSubnetGroup
+        Engine: aurora-postgresql
+        EngineMode: serverless
+        DatabaseName: ${self:service}
+        MasterUsername: ${ssm:/${self:service}/${self:provider.stage}/POSTGRES_USERNAME}
+        MasterUserPassword: ${ssm:/${self:service}/${self:provider.stage}/POSTGRES_PASSWORD}
+        VpcSecurityGroupIds:
+          - Ref: RDSSecurityGroup
+        ScalingConfiguration:
+          AutoPause: False
+          MinCapacity: 2
+          MaxCapacity: 256

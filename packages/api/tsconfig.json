@@ -12,7 +12,8 @@
     "noUnusedParameters": false,
     "pretty": true,
     "skipLibCheck": true,
-    "lib": ["es2015", "esnext.asynciterable"]
+    "lib": ["es2015", "esnext.asynciterable"],
+    "forceConsistentCasingInFileNames": true
   },
   "sourceMap": true,
   "outDir": ".build",
